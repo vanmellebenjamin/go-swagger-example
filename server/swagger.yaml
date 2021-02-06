@@ -1,0 +1,153 @@
+swagger: "2.0"
+info:
+  description: From the todo list tutorial on goswagger.io
+  title: A Todo list application
+  version: 1.0.0
+consumes:
+  - application/io.goswagger.examples.todo-list.v1+json
+produces:
+  - application/io.goswagger.examples.todo-list.v1+json
+schemes:
+  - http
+  - https
+paths:
+  /:
+    get:
+      tags:
+        - todos
+      operationId: findTodos
+      parameters:
+        - name: since
+          in: query
+          type: integer
+          format: int32
+          default: 0
+        - name: limit
+          in: query
+          type: integer
+          format: int32
+          default: 20
+      responses:
+        200:
+          description: list the todo operations
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/item"
+        default:
+          description: generic error response
+          schema:
+            $ref: "#/definitions/error"
+    post:
+      tags:
+        - todos
+      operationId: addOne
+      parameters:
+        - name: body
+          in: body
+          schema:
+            $ref: "#/definitions/item"
+      responses:
+        201:
+          description: Created
+          schema:
+            $ref: "#/definitions/item"
+        default:
+          description: error
+          schema:
+            $ref: "#/definitions/error"
+  /{id}:
+    parameters:
+      - type: integer
+        format: int32
+        name: id
+        in: path
+        required: true
+    get:
+      tags:
+        - todos
+      operationId: getOne
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: "#/definitions/item"
+        default:
+          description: error
+          schema:
+            $ref: "#/definitions/error"
+    put:
+      tags:
+        - todos
+      operationId: updateOne
+      parameters:
+        - name: body
+          in: body
+          schema:
+            $ref: "#/definitions/item"
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: "#/definitions/item"
+        default:
+          description: error
+          schema:
+            $ref: "#/definitions/error"
+    delete:
+      tags:
+        - todos
+      operationId: destroyOne
+      responses:
+        204:
+          description: Deleted
+        default:
+          description: error
+          schema:
+            $ref: "#/definitions/error"
+  /upload:
+    post:
+      tags:
+        - todos
+      operationId: uploadFile
+      summary: Uploads a file.
+      consumes:
+        - multipart/form-data
+      parameters:
+        - in: formData
+          name: file
+          type: file
+          description: The file to upload.
+          required: true
+      responses:
+        201:
+          description: Uploaded
+        default:
+          description: error
+          schema:
+            $ref: "#/definitions/error"
+definitions:
+  item:
+    type: object
+    required:
+      - description
+      - completed
+    properties:
+      id:
+        type: integer
+        format: int32
+      description:
+        type: string
+        minLength: 1
+      completed:
+        type: boolean
+  error:
+    type: object
+    required:
+      - message
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
