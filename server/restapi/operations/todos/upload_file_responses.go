@@ -21,6 +21,11 @@ const UploadFileCreatedCode int = 201
 swagger:response uploadFileCreated
 */
 type UploadFileCreated struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.File `json:"body,omitempty"`
 }
 
 // NewUploadFileCreated creates UploadFileCreated with default headers values
@@ -29,12 +34,27 @@ func NewUploadFileCreated() *UploadFileCreated {
 	return &UploadFileCreated{}
 }
 
+// WithPayload adds the payload to the upload file created response
+func (o *UploadFileCreated) WithPayload(payload *models.File) *UploadFileCreated {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the upload file created response
+func (o *UploadFileCreated) SetPayload(payload *models.File) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *UploadFileCreated) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(201)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
 }
 
 /*UploadFileDefault error

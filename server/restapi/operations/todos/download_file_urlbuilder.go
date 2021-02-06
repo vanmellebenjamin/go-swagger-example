@@ -9,17 +9,24 @@ import (
 	"errors"
 	"net/url"
 	golangswaggerpaths "path"
+	"strings"
+
+	"github.com/go-openapi/strfmt"
 )
 
-// UploadFileURL generates an URL for the upload file operation
-type UploadFileURL struct {
+// DownloadFileURL generates an URL for the download file operation
+type DownloadFileURL struct {
+	UUID strfmt.UUID
+
 	_basePath string
+	// avoid unkeyed usage
+	_ struct{}
 }
 
 // WithBasePath sets the base path for this url builder, only required when it's different from the
 // base path specified in the swagger spec.
 // When the value of the base path is an empty string
-func (o *UploadFileURL) WithBasePath(bp string) *UploadFileURL {
+func (o *DownloadFileURL) WithBasePath(bp string) *DownloadFileURL {
 	o.SetBasePath(bp)
 	return o
 }
@@ -27,15 +34,22 @@ func (o *UploadFileURL) WithBasePath(bp string) *UploadFileURL {
 // SetBasePath sets the base path for this url builder, only required when it's different from the
 // base path specified in the swagger spec.
 // When the value of the base path is an empty string
-func (o *UploadFileURL) SetBasePath(bp string) {
+func (o *DownloadFileURL) SetBasePath(bp string) {
 	o._basePath = bp
 }
 
 // Build a url path and query string
-func (o *UploadFileURL) Build() (*url.URL, error) {
+func (o *DownloadFileURL) Build() (*url.URL, error) {
 	var _result url.URL
 
-	var _path = "/file"
+	var _path = "/file/{uuid}"
+
+	uuid := o.UUID.String()
+	if uuid != "" {
+		_path = strings.Replace(_path, "{uuid}", uuid, -1)
+	} else {
+		return nil, errors.New("uuid is required on DownloadFileURL")
+	}
 
 	_basePath := o._basePath
 	_result.Path = golangswaggerpaths.Join(_basePath, _path)
@@ -44,7 +58,7 @@ func (o *UploadFileURL) Build() (*url.URL, error) {
 }
 
 // Must is a helper function to panic when the url builder returns an error
-func (o *UploadFileURL) Must(u *url.URL, err error) *url.URL {
+func (o *DownloadFileURL) Must(u *url.URL, err error) *url.URL {
 	if err != nil {
 		panic(err)
 	}
@@ -55,17 +69,17 @@ func (o *UploadFileURL) Must(u *url.URL, err error) *url.URL {
 }
 
 // String returns the string representation of the path with query string
-func (o *UploadFileURL) String() string {
+func (o *DownloadFileURL) String() string {
 	return o.Must(o.Build()).String()
 }
 
 // BuildFull builds a full url with scheme, host, path and query string
-func (o *UploadFileURL) BuildFull(scheme, host string) (*url.URL, error) {
+func (o *DownloadFileURL) BuildFull(scheme, host string) (*url.URL, error) {
 	if scheme == "" {
-		return nil, errors.New("scheme is required for a full url on UploadFileURL")
+		return nil, errors.New("scheme is required for a full url on DownloadFileURL")
 	}
 	if host == "" {
-		return nil, errors.New("host is required for a full url on UploadFileURL")
+		return nil, errors.New("host is required for a full url on DownloadFileURL")
 	}
 
 	base, err := o.Build()
@@ -79,6 +93,6 @@ func (o *UploadFileURL) BuildFull(scheme, host string) (*url.URL, error) {
 }
 
 // StringFull returns the string representation of a complete url
-func (o *UploadFileURL) StringFull(scheme, host string) string {
+func (o *DownloadFileURL) StringFull(scheme, host string) string {
 	return o.Must(o.BuildFull(scheme, host)).String()
 }

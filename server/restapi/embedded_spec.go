@@ -105,7 +105,7 @@ func init() {
         }
       }
     },
-    "/upload": {
+    "/file": {
       "post": {
         "consumes": [
           "multipart/form-data"
@@ -126,7 +126,10 @@ func init() {
         ],
         "responses": {
           "201": {
-            "description": "Uploaded"
+            "description": "Uploaded",
+            "schema": {
+              "$ref": "#/definitions/file"
+            }
           },
           "default": {
             "description": "error",
@@ -136,6 +139,59 @@ func init() {
           }
         }
       }
+    },
+    "/file/{uuid}": {
+      "get": {
+        "produces": [
+          "application/octet-stream"
+        ],
+        "tags": [
+          "todos"
+        ],
+        "summary": "Download a file.",
+        "operationId": "downloadFile",
+        "responses": {
+          "200": {
+            "description": "Downloading",
+            "schema": {
+              "type": "file"
+            }
+          },
+          "default": {
+            "description": "error",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "todos"
+        ],
+        "summary": "Delete a file.",
+        "operationId": "deleteFile",
+        "responses": {
+          "204": {
+            "description": "Deleted"
+          },
+          "default": {
+            "description": "error",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "type": "string",
+          "format": "uuid",
+          "name": "uuid",
+          "in": "path",
+          "required": true
+        }
+      ]
     },
     "/{id}": {
       "get": {
@@ -228,6 +284,18 @@ func init() {
         },
         "message": {
           "type": "string"
+        }
+      }
+    },
+    "file": {
+      "type": "object",
+      "required": [
+        "uuid"
+      ],
+      "properties": {
+        "uuid": {
+          "type": "string",
+          "format": "uuid"
         }
       }
     },
@@ -341,7 +409,7 @@ func init() {
         }
       }
     },
-    "/upload": {
+    "/file": {
       "post": {
         "consumes": [
           "multipart/form-data"
@@ -362,7 +430,10 @@ func init() {
         ],
         "responses": {
           "201": {
-            "description": "Uploaded"
+            "description": "Uploaded",
+            "schema": {
+              "$ref": "#/definitions/file"
+            }
           },
           "default": {
             "description": "error",
@@ -372,6 +443,59 @@ func init() {
           }
         }
       }
+    },
+    "/file/{uuid}": {
+      "get": {
+        "produces": [
+          "application/octet-stream"
+        ],
+        "tags": [
+          "todos"
+        ],
+        "summary": "Download a file.",
+        "operationId": "downloadFile",
+        "responses": {
+          "200": {
+            "description": "Downloading",
+            "schema": {
+              "type": "file"
+            }
+          },
+          "default": {
+            "description": "error",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "todos"
+        ],
+        "summary": "Delete a file.",
+        "operationId": "deleteFile",
+        "responses": {
+          "204": {
+            "description": "Deleted"
+          },
+          "default": {
+            "description": "error",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "type": "string",
+          "format": "uuid",
+          "name": "uuid",
+          "in": "path",
+          "required": true
+        }
+      ]
     },
     "/{id}": {
       "get": {
@@ -464,6 +588,18 @@ func init() {
         },
         "message": {
           "type": "string"
+        }
+      }
+    },
+    "file": {
+      "type": "object",
+      "required": [
+        "uuid"
+      ],
+      "properties": {
+        "uuid": {
+          "type": "string",
+          "format": "uuid"
         }
       }
     },

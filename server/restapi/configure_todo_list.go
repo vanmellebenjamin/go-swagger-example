@@ -106,12 +106,48 @@ func configureAPI(api *operations.TodoListAPI) http.Handler {
 	api.TodosUploadFileHandler = todos.UploadFileHandlerFunc(func(params todos.UploadFileParams) middleware.Responder {
 		file := params.File
 		defer file.Close()
-		if _, err := fileService.UploadFile(file); err != nil {
+		fileMeta, err := fileService.UploadFile(file);
+		if err != nil {
 			message := fmt.Sprintf("Failed To Upload the file: %s", err.Error())
 			payload := &models.Error{Code: http.StatusInternalServerError, Message: &message}
 			return todos.NewUploadFileDefault(http.StatusInternalServerError).WithPayload(payload)
 		}
-		return todos.NewUploadFileCreated()
+		return todos.NewUploadFileCreated().WithPayload(fileMeta)
+	})
+
+	api.TodosDownloadFileHandler = todos.DownloadFileHandlerFunc(func(params todos.DownloadFileParams) middleware.Responder {
+		uuid := params.UUID
+		file, err := fileService.DownloadFile(uuid)
+		if err != nil {
+			if err.Error() == "not_found" {
+				message := fmt.Sprintf("File Not Found")
+				payload := &models.Error{Code: http.StatusNotFound, Message: &message}
+				return todos.NewDownloadFileDefault(http.StatusNotFound).WithPayload(payload)
+			} else {
+				message := fmt.Sprintf("Cannot delete file: %s", err)
+				payload := &models.Error{Code: http.StatusInternalServerError, Message: &message}
+				return todos.NewDownloadFileDefault(http.StatusInternalServerError).WithPayload(payload)
+			}
+		}
+		response := todos.NewDownloadFileOK()
+		response.Payload = file
+		return response
+	})
+
+	api.TodosDeleteFileHandler = todos.DeleteFileHandlerFunc(func(params todos.DeleteFileParams) middleware.Responder {
+		uuid := params.UUID
+		if err := fileService.DeleteFile(uuid); err != nil {
+			if err.Error() == "not_found" {
+				message := fmt.Sprintf("File Not Found")
+				payload := &models.Error{Code: http.StatusNotFound, Message: &message}
+				return todos.NewDeleteFileDefault(http.StatusNotFound).WithPayload(payload)
+			} else {
+				message := fmt.Sprintf("Cannot delete file: %s", err)
+				payload := &models.Error{Code: http.StatusInternalServerError, Message: &message}
+				return todos.NewDeleteFileDefault(http.StatusInternalServerError).WithPayload(payload)
+			}
+		}
+		return todos.NewDeleteFileNoContent()
 	})
 
 	api.PreServerShutdown = func() {}

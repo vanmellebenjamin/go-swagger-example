@@ -15,6 +15,7 @@
 //    - multipart/form-data
 //
 //  Produces:
+//    - application/octet-stream
 //    - application/io.goswagger.examples.todo-list.v1+json
 //
 // swagger:meta

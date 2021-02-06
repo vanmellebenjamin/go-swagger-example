@@ -105,7 +105,7 @@ paths:
           description: error
           schema:
             $ref: "#/definitions/error"
-  /upload:
+  /file:
     post:
       tags:
         - todos
@@ -122,11 +122,56 @@ paths:
       responses:
         201:
           description: Uploaded
+          schema:
+            $ref: "#/definitions/file"
+        default:
+          description: error
+          schema:
+            $ref: "#/definitions/error"
+  /file/{uuid}:
+    parameters:
+      - type: string
+        format: uuid
+        name: uuid
+        in: path
+        required: true
+    get:
+      tags:
+        - todos
+      operationId: downloadFile
+      summary: Download a file.
+      produces:
+        - application/octet-stream
+      responses:
+        200:
+          description: Downloading
+          schema:
+            type: file
+        default:
+          description: error
+          schema:
+            $ref: "#/definitions/error"
+    delete:
+      tags:
+        - todos
+      operationId: deleteFile
+      summary: Delete a file.
+      responses:
+        204:
+          description: Deleted
         default:
           description: error
           schema:
             $ref: "#/definitions/error"
 definitions:
+  file:
+    type: object
+    required:
+      - uuid
+    properties:
+      uuid:
+        type: string
+        format: uuid
   item:
     type: object
     required:

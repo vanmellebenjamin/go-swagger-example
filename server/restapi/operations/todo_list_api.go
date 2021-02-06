@@ -43,13 +43,20 @@ func NewTodoListAPI(spec *loads.Document) *TodoListAPI {
 		JSONConsumer:          runtime.JSONConsumer(),
 		MultipartformConsumer: runtime.DiscardConsumer,
 
+		BinProducer:  runtime.ByteStreamProducer(),
 		JSONProducer: runtime.JSONProducer(),
 
 		TodosAddOneHandler: todos.AddOneHandlerFunc(func(params todos.AddOneParams) middleware.Responder {
 			return middleware.NotImplemented("operation todos.AddOne has not yet been implemented")
 		}),
+		TodosDeleteFileHandler: todos.DeleteFileHandlerFunc(func(params todos.DeleteFileParams) middleware.Responder {
+			return middleware.NotImplemented("operation todos.DeleteFile has not yet been implemented")
+		}),
 		TodosDestroyOneHandler: todos.DestroyOneHandlerFunc(func(params todos.DestroyOneParams) middleware.Responder {
 			return middleware.NotImplemented("operation todos.DestroyOne has not yet been implemented")
+		}),
+		TodosDownloadFileHandler: todos.DownloadFileHandlerFunc(func(params todos.DownloadFileParams) middleware.Responder {
+			return middleware.NotImplemented("operation todos.DownloadFile has not yet been implemented")
 		}),
 		TodosFindTodosHandler: todos.FindTodosHandlerFunc(func(params todos.FindTodosParams) middleware.Responder {
 			return middleware.NotImplemented("operation todos.FindTodos has not yet been implemented")
@@ -98,14 +105,21 @@ type TodoListAPI struct {
 	//   - multipart/form-data
 	MultipartformConsumer runtime.Consumer
 
+	// BinProducer registers a producer for the following mime types:
+	//   - application/octet-stream
+	BinProducer runtime.Producer
 	// JSONProducer registers a producer for the following mime types:
 	//   - application/io.goswagger.examples.todo-list.v1+json
 	JSONProducer runtime.Producer
 
 	// TodosAddOneHandler sets the operation handler for the add one operation
 	TodosAddOneHandler todos.AddOneHandler
+	// TodosDeleteFileHandler sets the operation handler for the delete file operation
+	TodosDeleteFileHandler todos.DeleteFileHandler
 	// TodosDestroyOneHandler sets the operation handler for the destroy one operation
 	TodosDestroyOneHandler todos.DestroyOneHandler
+	// TodosDownloadFileHandler sets the operation handler for the download file operation
+	TodosDownloadFileHandler todos.DownloadFileHandler
 	// TodosFindTodosHandler sets the operation handler for the find todos operation
 	TodosFindTodosHandler todos.FindTodosHandler
 	// TodosGetOneHandler sets the operation handler for the get one operation
@@ -190,6 +204,9 @@ func (o *TodoListAPI) Validate() error {
 		unregistered = append(unregistered, "MultipartformConsumer")
 	}
 
+	if o.BinProducer == nil {
+		unregistered = append(unregistered, "BinProducer")
+	}
 	if o.JSONProducer == nil {
 		unregistered = append(unregistered, "JSONProducer")
 	}
@@ -197,8 +214,14 @@ func (o *TodoListAPI) Validate() error {
 	if o.TodosAddOneHandler == nil {
 		unregistered = append(unregistered, "todos.AddOneHandler")
 	}
+	if o.TodosDeleteFileHandler == nil {
+		unregistered = append(unregistered, "todos.DeleteFileHandler")
+	}
 	if o.TodosDestroyOneHandler == nil {
 		unregistered = append(unregistered, "todos.DestroyOneHandler")
+	}
+	if o.TodosDownloadFileHandler == nil {
+		unregistered = append(unregistered, "todos.DownloadFileHandler")
 	}
 	if o.TodosFindTodosHandler == nil {
 		unregistered = append(unregistered, "todos.FindTodosHandler")
@@ -260,6 +283,8 @@ func (o *TodoListAPI) ProducersFor(mediaTypes []string) map[string]runtime.Produ
 	result := make(map[string]runtime.Producer, len(mediaTypes))
 	for _, mt := range mediaTypes {
 		switch mt {
+		case "application/octet-stream":
+			result["application/octet-stream"] = o.BinProducer
 		case "application/io.goswagger.examples.todo-list.v1+json":
 			result["application/io.goswagger.examples.todo-list.v1+json"] = o.JSONProducer
 		}
@@ -309,7 +334,15 @@ func (o *TodoListAPI) initHandlerCache() {
 	if o.handlers["DELETE"] == nil {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
 	}
+	o.handlers["DELETE"]["/file/{uuid}"] = todos.NewDeleteFile(o.context, o.TodosDeleteFileHandler)
+	if o.handlers["DELETE"] == nil {
+		o.handlers["DELETE"] = make(map[string]http.Handler)
+	}
 	o.handlers["DELETE"]["/{id}"] = todos.NewDestroyOne(o.context, o.TodosDestroyOneHandler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/file/{uuid}"] = todos.NewDownloadFile(o.context, o.TodosDownloadFileHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
@@ -325,7 +358,7 @@ func (o *TodoListAPI) initHandlerCache() {
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/upload"] = todos.NewUploadFile(o.context, o.TodosUploadFileHandler)
+	o.handlers["POST"]["/file"] = todos.NewUploadFile(o.context, o.TodosUploadFileHandler)
 }
 
 // Serve creates a http handler to serve the API over HTTP
