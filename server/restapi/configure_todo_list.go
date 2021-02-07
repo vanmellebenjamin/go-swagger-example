@@ -40,8 +40,7 @@ func configureAPI(api *operations.TodoListAPI) http.Handler {
 
 	ctx, mongoClient := connectMongoClient(cfg, err)
 
-	var itemRepository repositories.ItemRepository =
-		repositories.NewMongoItemRepository(mongoClient, cfg.Mongo.DatabaseName, "todo_list")
+	var itemRepository repositories.ItemRepository = repositories.NewMongoItemRepository(mongoClient, cfg.Mongo.DatabaseName, "todo_list")
 	var fileService services.FileService = services.NewLocalFileService()
 
 	api.Logger = log.Printf

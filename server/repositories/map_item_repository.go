@@ -8,8 +8,8 @@ import (
 )
 
 type MapItemRepository struct {
-	lock sync.Mutex
-	items map[int]models.Item
+	lock        sync.Mutex
+	items       map[int]models.Item
 	primaryKeys []int
 }
 
@@ -36,7 +36,7 @@ func (itemRepository *MapItemRepository) AddItem(item models.Item) (*models.Item
 	}
 }
 
-func (itemRepository *MapItemRepository) FindItem(ID int32)  (*models.Item, error) {
+func (itemRepository *MapItemRepository) FindItem(ID int32) (*models.Item, error) {
 	itemRepository.lock.Lock()
 	defer itemRepository.lock.Unlock()
 	item, ok := itemRepository.items[int(ID)]
@@ -54,13 +54,13 @@ func (itemRepository *MapItemRepository) DeleteItem(ID int32) error {
 	if index < len(itemRepository.primaryKeys) && itemRepository.primaryKeys[index] == int(ID) {
 		delete(itemRepository.items, int(ID))
 		copy(itemRepository.primaryKeys[index:], itemRepository.primaryKeys[index+1:])
-		itemRepository.primaryKeys = itemRepository.primaryKeys[:len(itemRepository.primaryKeys) - 1]
+		itemRepository.primaryKeys = itemRepository.primaryKeys[:len(itemRepository.primaryKeys)-1]
 		return nil
 	}
 	return errors.New("not_found")
 }
 
-func (itemRepository *MapItemRepository) FindItems(from int32, limit int32)  ([]*models.Item, error) {
+func (itemRepository *MapItemRepository) FindItems(from int32, limit int32) ([]*models.Item, error) {
 	itemRepository.lock.Lock()
 	defer itemRepository.lock.Unlock()
 	itemsQty := len(itemRepository.primaryKeys)
@@ -69,7 +69,7 @@ func (itemRepository *MapItemRepository) FindItems(from int32, limit int32)  ([]
 	} else {
 		to := itemsQty
 		if itemsQty > int(from)+int(limit) {
-			to = int(from)+int(limit)
+			to = int(from) + int(limit)
 		}
 
 		var items []*models.Item
@@ -82,7 +82,7 @@ func (itemRepository *MapItemRepository) FindItems(from int32, limit int32)  ([]
 	}
 }
 
-func (itemRepository *MapItemRepository) UpdateItem(item models.Item) (*models.Item, error)  {
+func (itemRepository *MapItemRepository) UpdateItem(item models.Item) (*models.Item, error) {
 	itemRepository.lock.Lock()
 	defer itemRepository.lock.Unlock()
 	_, ok := itemRepository.items[int(item.ID)]

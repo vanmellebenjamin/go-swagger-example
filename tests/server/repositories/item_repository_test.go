@@ -61,7 +61,6 @@ func TestInsertGetNotFound(t *testing.T) {
 	}
 }
 
-
 func TestInsertAndGetList(t *testing.T) {
 	// given
 	var itemRepository repositories.ItemRepository = repositories.NewMapItemRepository()
@@ -148,7 +147,7 @@ func TestConcurrentInsert(t *testing.T) {
 	wg.Wait()
 
 	// then
-	for i := 0; i < workers * qtyPerWorker; i++ {
+	for i := 0; i < workers*qtyPerWorker; i++ {
 		item, err := itemRepository.FindItem(int32(i))
 		if err != nil {
 			t.Errorf("error append during get %v %s", i, err)
@@ -159,9 +158,9 @@ func TestConcurrentInsert(t *testing.T) {
 
 func insertItems(workerNumber int, qty int, itemRepository repositories.ItemRepository, wg *sync.WaitGroup) {
 	defer wg.Done()
-	time.Sleep(time.Duration(200) *  time.Millisecond)
+	time.Sleep(time.Duration(200) * time.Millisecond)
 	completed := false
 	for i := 0; i < qty; i++ {
-		itemRepository.AddItem(models.Item{ID: int32(workerNumber * qty + i), Completed: &completed, Description: nil})
+		itemRepository.AddItem(models.Item{ID: int32(workerNumber*qty + i), Completed: &completed, Description: nil})
 	}
 }

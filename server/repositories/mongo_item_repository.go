@@ -12,14 +12,14 @@ import (
 )
 
 type MongoItemRepository struct {
-	client *mongo.Client
-	dbName string
+	client         *mongo.Client
+	dbName         string
 	collectionName string
 }
 
 type itemMongo struct {
-	ID int `bson:"_id"`
-	Completed bool `bson:"completed"`
+	ID          int    `bson:"_id"`
+	Completed   bool   `bson:"completed"`
 	Description string `bson:"description"`
 }
 
@@ -51,7 +51,7 @@ func (mongoItemRepository *MongoItemRepository) AddItem(item models.Item) (*mode
 	return &item, nil
 }
 
-func (mongoItemRepository *MongoItemRepository) FindItem(ID int32)  (*models.Item, error) {
+func (mongoItemRepository *MongoItemRepository) FindItem(ID int32) (*models.Item, error) {
 	collection := mongoItemRepository.getCollection()
 
 	var itemMongo itemMongo
@@ -81,15 +81,15 @@ func (mongoItemRepository *MongoItemRepository) DeleteItem(ID int32) error {
 	return nil
 }
 
-func (mongoItemRepository *MongoItemRepository) FindItems(from int32, limit int32)  ([]*models.Item, error) {
+func (mongoItemRepository *MongoItemRepository) FindItems(from int32, limit int32) ([]*models.Item, error) {
 	collection := mongoItemRepository.getCollection()
 
 	limit64 := int64(limit)
 	skip := int64(from)
 	findOptions := options.FindOptions{
 		Limit: &limit64,
-		Skip: &skip,
-		Sort: bson.D{{"_id", 1}},
+		Skip:  &skip,
+		Sort:  bson.D{{"_id", 1}},
 	}
 	cursor, err := collection.Find(context.TODO(), bson.D{}, &findOptions)
 	defer cursor.Close(nil)
@@ -114,7 +114,7 @@ func (mongoItemRepository *MongoItemRepository) FindItems(from int32, limit int3
 	return items, nil
 }
 
-func (mongoItemRepository *MongoItemRepository) UpdateItem(item models.Item) (*models.Item, error)  {
+func (mongoItemRepository *MongoItemRepository) UpdateItem(item models.Item) (*models.Item, error) {
 	collection := mongoItemRepository.client.Database(mongoItemRepository.dbName).Collection(mongoItemRepository.collectionName)
 	mongoItem, err := toMongoItem(item)
 	if err != nil {
@@ -144,9 +144,9 @@ func toMongoItem(item models.Item) (*itemMongo, error) {
 }
 
 func toItem(itemMongo itemMongo) (*models.Item, error) {
-	return &models.Item {
-		ID: int32(itemMongo.ID),
+	return &models.Item{
+		ID:          int32(itemMongo.ID),
 		Description: &itemMongo.Description,
-		Completed: &itemMongo.Completed,
+		Completed:   &itemMongo.Completed,
 	}, nil
 }
