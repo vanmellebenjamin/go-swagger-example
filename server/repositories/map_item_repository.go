@@ -47,7 +47,7 @@ func (itemRepository *MapItemRepository) FindItem(ID int32)  (*models.Item, erro
 	}
 }
 
-func (itemRepository *MapItemRepository) DeleteItem(ID int32) {
+func (itemRepository *MapItemRepository) DeleteItem(ID int32) error {
 	itemRepository.lock.Lock()
 	defer itemRepository.lock.Unlock()
 	index := sort.SearchInts(itemRepository.primaryKeys, int(ID))
@@ -55,7 +55,9 @@ func (itemRepository *MapItemRepository) DeleteItem(ID int32) {
 		delete(itemRepository.items, int(ID))
 		copy(itemRepository.primaryKeys[index:], itemRepository.primaryKeys[index+1:])
 		itemRepository.primaryKeys = itemRepository.primaryKeys[:len(itemRepository.primaryKeys) - 1]
+		return nil
 	}
+	return errors.New("not_found")
 }
 
 func (itemRepository *MapItemRepository) FindItems(from int32, limit int32)  ([]*models.Item, error) {

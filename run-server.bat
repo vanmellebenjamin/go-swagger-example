@@ -1,10 +1,13 @@
 @echo off
 
-swagger generate server -A TodoList -f server\swagger.yaml
+cd server
+swagger generate server -A TodoList -f swagger.yaml
 if not %errorlevel% == 0 (
     echo Failed Code Generation
     goto end
 )
+
+cd ..
 
 go test .\tests\...
 if not %errorlevel% == 0 (
